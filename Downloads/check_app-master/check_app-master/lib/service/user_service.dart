@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UserService with ChangeNotifier {
@@ -115,5 +116,40 @@ class UserService with ChangeNotifier {
     name = snapshot.docs[0].get("name");
 
     notifyListeners();
+  }
+
+  void sighInWithGoogle({required Function() onSuccess}) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      UserCredential user =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("uid", isEqualTo: user.user!.uid)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        await FirebaseFirestore.instance.collection('users').add({
+          "uid": user.user!.uid,
+          "name": user.user!.displayName,
+          "profile_image": user.user!.photoURL
+        });
+      }
+
+      onSuccess();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
   }
 }

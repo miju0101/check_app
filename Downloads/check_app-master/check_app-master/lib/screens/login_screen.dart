@@ -73,6 +73,23 @@ class LoginScreen extends StatelessWidget {
                 );
               },
               child: const Text("회원가입"),
+            ),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              child: ElevatedButton(
+                  onPressed: () {
+                    context.read<UserService>().sighInWithGoogle(onSuccess: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(),
+                        ),
+                      );
+                    });
+                  },
+                  child: const Text("구글로 로그인")),
             )
           ],
         ),

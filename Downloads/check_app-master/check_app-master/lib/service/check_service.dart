@@ -30,7 +30,6 @@ class CheckSerivce with ChangeNotifier {
     await isExists(uid);
 
     if (isCheck == true) {
-      print("이미 체크했습니다.");
       return;
     } else {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -48,7 +47,6 @@ class CheckSerivce with ChangeNotifier {
         "date": DateTime.now()
       });
 
-      isCheck = true;
       notifyListeners();
     }
   }
